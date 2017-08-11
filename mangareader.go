@@ -39,29 +39,19 @@ func (d *readerManga) getChapters(n int) {
 	match := getMatchFromSearchResults(results)
 	*d.MangaName = match.manga
 
-	p := pool.NewPool(n, len(*d.Args)) //goroutine pool
-
-	fn := func(job *pool.Job) { //job
-		e := job.Params()[0].(*readerChapter).getChapter()
-		if e != nil {
-			fmt.Printf("Download Failed: %v chapter %v (%v)\n",
-				job.Params()[0].(*readerChapter).manga, job.Params()[0].(*readerChapter).chapter, e)
-			return
-		}
-		job.Return(job.Params()[0].(*readerChapter).manga + " chapter " + job.Params()[0].(*readerChapter).chapter)
-	}
+	downloader := chapterDownloader{}.init(n, len(*d.Args))
 
 	for _, chapter := range *d.Args {
-		p.Queue(fn, &readerChapter{
+		downloader.queue(&readerChapter{
 			sourceUrl:  d.sourceUrl,
-			mangaId:    match.mangaID, // we actually pass the manga_id from the path here and build the url later in getChapterFromReader
+			mangaId:    match.mangaID,
 			manga:      *d.MangaName,
 			chapter:    strconv.Itoa(chapter),
 			chapterUrl: d.sourceUrl + match.mangaID + "/" + strconv.Itoa(chapter),
-		}) //queue the jobs
+		})
 	}
 
-	for result := range p.Results() { //receive results
+	for result := range downloader.startDownloads() { //receive results
 		err, ok := result.(*pool.ErrRecovery)
 		if ok { // there was some sort of panic that
 			log.Println(err) // was recovered, in this scenario
@@ -71,6 +61,14 @@ func (d *readerManga) getChapters(n int) {
 		fmt.Println("Download Successful: ", res)
 	}
 
+}
+
+func (c *readerChapter) getMangaName() string {
+	return c.manga
+}
+
+func (c *readerChapter) getChapterName() string {
+	return c.chapter
 }
 
 //@TODO If a chapter doesn't exist onsite, return an error.

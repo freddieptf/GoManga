@@ -44,27 +44,17 @@ func (d *foxManga) getChapters(n int) {
 
 	match := getMatchFromSearchResults(results)
 
-	p := pool.NewPool(n, len(*d.Args))
-
-	fn := func(job *pool.Job) {
-		e := job.Params()[0].(*foxChapter).getChapter()
-		if e != nil {
-			fmt.Printf("Download Failed: %v chapter %v (%v)\n",
-				job.Params()[0].(*foxChapter).manga, job.Params()[0].(*foxChapter).chapter, e)
-			return
-		}
-		job.Return(job.Params()[0].(*foxChapter).manga + " " + job.Params()[0].(*foxChapter).chapter)
-	}
+	downloader := chapterDownloader{}.init(n, len(*d.Args))
 
 	for _, chapter := range *d.Args {
-		p.Queue(fn, &foxChapter{
+		downloader.queue(&foxChapter{
 			chapterUrl: match.mangaID,
 			manga:      match.manga,
 			chapter:    strconv.Itoa(chapter),
 		})
 	}
 
-	for result := range p.Results() {
+	for result := range downloader.startDownloads() {
 		err, ok := result.(*pool.ErrRecovery)
 		if ok { // there was some sort of panic that
 			fmt.Println(err) // was recovered, in this scenario
@@ -94,20 +84,11 @@ func (d *foxManga) getVolumes(n int) {
 	*d.MangaName = match.manga
 	volumes := findFoxVolumes(doc, d)
 
-	p := pool.NewPool(n, len(*d.Args))
-	fn := func(job *pool.Job) {
-		e := job.Params()[0].(*foxChapter).getChapter()
-		if e != nil {
-			fmt.Printf("Download Failed: %v chapter %v (%v)\n",
-				job.Params()[0].(*foxChapter).manga, job.Params()[0].(*foxChapter).chapter, e)
-			return
-		}
-		job.Return(job.Params()[0].(*foxChapter).manga + " " + job.Params()[0].(*foxChapter).chapter)
-	}
+	downloader := chapterDownloader{}.init(n, len(*d.Args))
 
 	for i := len(volumes) - 1; i >= 0; i-- { //reverse the order since the older volumes are at the end...older first
 		for _, chapter := range volumes[i].chapters {
-			p.Queue(fn, &foxChapter{
+			downloader.queue(&foxChapter{
 				manga:     *d.MangaName,
 				chapter:   chapter,
 				volume:    volumes[i].volume,
@@ -116,12 +97,12 @@ func (d *foxManga) getVolumes(n int) {
 		}
 	}
 
-	for result := range p.Results() {
-		// err, ok := result.(*pool.ErrRecovery)
-		// if ok { // there was some sort of panic that
-		// 	log.Println(err) // was recovered, in this scenario
-		// 	return
-		// }
+	for result := range downloader.startDownloads() {
+		err, ok := result.(*pool.ErrRecovery)
+		if ok { // there was some sort of panic that
+			log.Println(err) // was recovered, in this scenario
+			return
+		}
 		res := result.(string)
 		fmt.Println("Download Successful: ", res)
 	}
@@ -150,6 +131,14 @@ func findFoxVolumes(doc *goquery.Document, d *foxManga) []volume {
 		}
 	})
 	return vols
+}
+
+func (c *foxChapter) getMangaName() string {
+	return c.manga
+}
+
+func (c *foxChapter) getChapterName() string {
+	return c.chapter
 }
 
 func (c *foxChapter) getChapter() error {

@@ -5,11 +5,3 @@ type mangaSource interface {
 	getChapters(n int)
 	getVolumes(n int)
 }
-
-type chapterSource interface {
-	getChapter() error
-}
-
-type searchResult struct {
-	manga, mangaID string
-}

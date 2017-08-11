@@ -20,6 +20,10 @@ type imgItem struct {
 	ID  int
 }
 
+type searchResult struct {
+	manga, mangaID string
+}
+
 func GetRange(vals *[]string) *[]int {
 	var x, y int
 	var err error
