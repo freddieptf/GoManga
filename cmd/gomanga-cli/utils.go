@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	"archive/zip"
@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	scraper "github.com/freddieptf/manga-scraper/scraper"
+	scraper "github.com/freddieptf/manga-scraper/pkg/scraper"
 )
 
 func getRange(vals *[]string) *[]int {

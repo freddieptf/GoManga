@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	scraper "github.com/freddieptf/manga-scraper/scraper"
+	scraper "github.com/freddieptf/manga-scraper/pkg/scraper"
 )
 
 var downloadJobChan chan scraper.Chapter

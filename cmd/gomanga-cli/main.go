@@ -1,10 +1,10 @@
-package cli
+package main
 
 import (
 	"fmt"
 	"log"
 
-	scraper "github.com/freddieptf/manga-scraper/scraper"
+	scraper "github.com/freddieptf/manga-scraper/pkg/scraper"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -20,7 +20,7 @@ var (
 		"chapters (volumes if --vlm is set) to download. Example format: 1 3 5-7 67 10-14").Strings()
 )
 
-func CliParse() {
+func main() {
 	kingpin.Parse()
 	n := 1 //default num of maxActiveDownloads
 	if *maxActiveDownloads != 0 {

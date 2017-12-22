@@ -1,4 +1,4 @@
-package cli
+package main
 
 import (
 	"io/ioutil"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"sync"
 
-	scraper "github.com/freddieptf/manga-scraper/scraper"
+	scraper "github.com/freddieptf/manga-scraper/pkg/scraper"
 )
 
 type pageDownloadJob struct {
