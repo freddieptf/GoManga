@@ -1,4 +1,4 @@
-package mangascraper
+package scraper
 
 import (
 	"crypto/tls"

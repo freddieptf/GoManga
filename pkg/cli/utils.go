@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"archive/zip"
@@ -15,7 +15,7 @@ import (
 	scraper "github.com/freddieptf/manga-scraper/pkg/scraper"
 )
 
-func getChapterRange(arg string, ran *[]int, entryMap *map[int]struct{}) {
+func GetChapterRange(arg string, ran *[]int, entryMap *map[int]struct{}) {
 	chs := strings.Split(arg, "-")
 	if len(chs) > 1 {
 		// exit early if neccessary
@@ -67,12 +67,12 @@ func getChapterRange(arg string, ran *[]int, entryMap *map[int]struct{}) {
 }
 
 // convert command line chapter args to their int equivalents
-func getChapterRangeFromArgs(vals *[]string) *[]int {
+func GetChapterRangeFromArgs(vals *[]string) *[]int {
 	chapters := []int{}
 	chapterMap := make(map[int]struct{})
 	for _, val := range *vals {
 		if strings.Contains(val, "-") {
-			getChapterRange(val, &chapters, &chapterMap)
+			GetChapterRange(val, &chapters, &chapterMap)
 		} else {
 			x, err := strconv.Atoi(val)
 			if err != nil {
@@ -89,21 +89,21 @@ func getChapterRangeFromArgs(vals *[]string) *[]int {
 }
 
 // just something to help with tests
-type readWrite struct {
-	readFrom io.Reader
-	writeTo  io.Writer
+type ReadWrite struct {
+	ReadFrom io.Reader
+	WriteTo  io.Writer
 }
 
-func getMatchFromSearchResults(r readWrite, results []scraper.Manga) scraper.Manga {
-	fmt.Fprint(r.writeTo, "Id \t Manga\n")
+func GetMatchFromSearchResults(r ReadWrite, results []scraper.Manga) scraper.Manga {
+	fmt.Fprint(r.WriteTo, "Id \t Manga\n")
 	ids := make(map[int]scraper.Manga)
 	for i, m := range results {
-		fmt.Fprintf(r.writeTo, "%d \t %s\n", i+1, m.MangaName)
+		fmt.Fprintf(r.WriteTo, "%d \t %s\n", i+1, m.MangaName)
 		ids[i+1] = m
 	}
 
-	myScanner := bufio.NewScanner(r.readFrom)
-	fmt.Fprintf(r.writeTo, "Enter the id of the correct manga: ")
+	myScanner := bufio.NewScanner(r.ReadFrom)
+	fmt.Fprintf(r.WriteTo, "Enter the id of the correct manga: ")
 	var (
 		id  int
 		err error
@@ -114,7 +114,7 @@ func getMatchFromSearchResults(r readWrite, results []scraper.Manga) scraper.Man
 			log.Printf("Try again. err %v\n", err)
 		} else {
 			if _, ok := ids[id]; !ok {
-				fmt.Fprintf(r.writeTo, "Enter a valid Id, please: ")
+				fmt.Fprintf(r.WriteTo, "Enter a valid Id, please: ")
 			} else {
 				break
 			}

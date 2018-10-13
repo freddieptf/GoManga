@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"io"
@@ -17,10 +17,10 @@ func TestGetChapterRangeFromArg(t *testing.T) {
 		expected *[]int
 	}{
 		{"1-3", &[]int{}, &map[int]struct{}{}, &[]int{1, 2, 3}},
-		{"1-3", &[]int{}, &map[int]struct{}{1: struct{}{}}, &[]int{2, 3}},
+		{"1-3", &[]int{}, &map[int]struct{}{1: {}}, &[]int{2, 3}},
 		{"1-1", &[]int{}, &map[int]struct{}{}, &[]int{1}},
-		{"1-1", &[]int{}, &map[int]struct{}{1: struct{}{}}, &[]int{}},
-		{"-3", &[]int{}, &map[int]struct{}{1: struct{}{}}, &[]int{3}},
+		{"1-1", &[]int{}, &map[int]struct{}{1: {}}, &[]int{}},
+		{"-3", &[]int{}, &map[int]struct{}{1: {}}, &[]int{3}},
 	} {
 		getChapterRange(arg.val, arg.ran, arg.entryMap)
 		if !reflect.DeepEqual(arg.ran, arg.expected) {
@@ -65,8 +65,8 @@ func TestGetMatchFromSearchResults(t *testing.T) {
 		input    string
 		expected scraper.Manga
 	}{
-		{[]scraper.Manga{scraper.Manga{"test", "/test/url"}, scraper.Manga{"test1", "/test/url/1"}}, "2", scraper.Manga{"test1", "/test/url/1"}},
-		{[]scraper.Manga{scraper.Manga{"test", "/test/url"}, scraper.Manga{"test1", "/test/url/1"}}, "1", scraper.Manga{"test", "/test/url"}},
+		{[]scraper.Manga{{"test", "/test/url"}, {"test1", "/test/url/1"}}, "2", scraper.Manga{"test1", "/test/url/1"}},
+		{[]scraper.Manga{{"test", "/test/url"}, {"test1", "/test/url/1"}}, "1", scraper.Manga{"test", "/test/url"}},
 	}
 
 	for _, arg := range manga {

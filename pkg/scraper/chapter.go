@@ -1,4 +1,4 @@
-package mangascraper
+package scraper
 
 type ChapterPage struct {
 	Page int
@@ -11,8 +11,4 @@ type Chapter struct {
 	VolumeTitle  string
 	SourceName   string
 	ChapterPages []ChapterPage
-}
-
-type sourceChapter interface {
-	getChapter() (Chapter, error)
 }
